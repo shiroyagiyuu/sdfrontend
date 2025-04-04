@@ -1,117 +1,75 @@
 package pureplus;
 
-import java.io.*;
-import java.util.HashMap;
+import java.util.ArrayList;
 
-public class JSONMap
+class JSONMember
 {
-	private boolean isWhiteSpace(int c) {
-		switch (c) {
-		case ' ':
-		case '\t':
-			return true;
-		}
-		return false;
+	String	key;
+	Object  value;
+
+	public JSONMember(String key, Object value) {
+		this.key = key;
+		this.value = value;
 	}
 
-	/**
-	 * Stringをリードする。最初の'"'は読み込み済みであること
-	 */
-	private String parseString(PushbackReader rd) throws IOException {
-		int  c;
-		StringBuilder  sb = new StringBuilder();
-
-		c = rd.read();
-		while(c!='\"' && c>=0) {
-			sb.append(c);
-			c = rd.read();
-		}
-		return sb.toString();
+	public String getKey() {
+		return key;
 	}
 
-	private boolean isNumber(int c) {
-		if ('0'<=c && c<='9') return true;
-		if (c=='.') return true;
-
-		return false;
+	public void setKey(String key) {
+		this.key = key;
 	}
 
-	private Object parseNumber(PushbackReader rd) throws IOException {
-		int c;
-		StringBuilder  sb = new StringBuilder();
-
-		c = rd.read();
-		while(c>=0 && isNumber(c)) {
-			sb.append(c);
-			c = rd.read();
-		}
-		rd.unread(c);
-
-		if (sb.indexOf(".")>0) {
-			return Double.valueOf(sb.toString());
-		} else {
-			return Integer.valueOf(sb.toString());
-		}
+	public Object getValue() {
+		return value;
 	}
 
-	private void parseMember(PushbackReader rd, HashMap<String,Object> map) throws IOException {
-		int  c;
-		String  key;
-		Object  val;
-
-		c = rd.read();
-
-		//if (c!='\"') parse error?
-
-		key = parseString(rd);
-
-		while(isWhiteSpace(c)) { c = rd.read(); }
-		//if (c!=':') error
-		
-		c = rd.read();
-		
-		while(isWhiteSpace(c)) { c = rd.read(); }
-
-		if(c == '\"') {
-			val = parseString(rd);
-		} else {
-			rd.unread(c);
-			val = parseNumber(rd);
-		}
-
-		map.put(key,val);
-	}
-
-	HashMap<String,Object> parseObject(PushbackReader rd) throws IOException {
-		int  c;
-		HashMap<String,Object>   map = new HashMap<String,Object>();
-
-		c = rd.read();
-		while (isWhiteSpace(c)) { c = rd.read(); }
-
-		if (c!='{') {
-			System.out.println("parse error?");
-		}
-
-		c = rd.read();
-		
-		while (c>=0) {
-			if (isWhiteSpace(c)) {
-				//skip
-			}
-			else if(c==',') {
-				//do nothing.
-			}
-			else if(c=='}') {
-				return map;
-			}
-			else {
-				rd.unread(c);
-				parseMember(rd, map);
-			}
-			c = rd.read();
-		}
-
-		return map;
+	public void setValue(Object o) {
+		this.value = o;
 	}
 }
+
+public class JSONObject
+{
+	ArrayList<JSONMember>	members;
+
+	public JSONObject() {
+		members = new ArrayList<JSONMember>();
+	}
+
+	public void add(JSONMember mbr) {
+		members.add(mbr);
+	}
+
+	public void add(String key, Object value) {
+		members.add(new JSONMember(key, value));
+	}
+
+	public Object get(String key) {
+		for (JSONMember m : members) {
+			if (key.equals(m.getKey())) {
+				return m.getValue();
+			}
+		}
+		return null;
+	}
+
+	public int getInt(String key) {
+		Object o;
+		o = get(key);
+		if (o instanceof Integer) {
+			return (int)o;
+		}
+		return 0;
+	}
+
+	public double getDouble(String key) {
+		Object o;
+		o = get(key);
+		if (o instanceof Double) {
+			return (double)o;
+		}
+		return 0.0;
+	}
+}
+
