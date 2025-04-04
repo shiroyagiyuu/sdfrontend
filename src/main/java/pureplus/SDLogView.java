@@ -166,7 +166,7 @@ public class SDLogView
 
 		imageview = new SDImageView();
 		imageview.setSize(new Dimension(512,512));
-		pane.add(imageview, BorderLayout.EAST);
+		//pane.add(imageview, BorderLayout.EAST);
 
 		JPanel  ctrlpane = new JPanel();
 		ctrlpane.add(new JLabel("curr:"));
@@ -199,7 +199,10 @@ public class SDLogView
 
 		pane.add(ctrlpane,BorderLayout.NORTH);
 
-		frm.setContentPane(pane);
+		JSplitPane sppane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+										pane,imageview);
+
+		frm.setContentPane(sppane);
 
 		frm.pack();
 		frm.setVisible(true);
