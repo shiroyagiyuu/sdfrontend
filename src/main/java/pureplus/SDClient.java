@@ -5,9 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.*;
 import java.net.http.*;
-import java.net.http.HttpRequest.BodyPublisher;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodyHandlers;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 
 public class SDClient {
@@ -71,7 +70,7 @@ public class SDClient {
         String uri = host + "/" + "sdapi/v1/txt2img";
 
         HttpRequest  request = HttpRequest.newBuilder(new URI(uri))
-        .POST(BodyPublishers.ofString(reqjson))
+        .POST(HttpRequest.BodyPublishers.ofString(reqjson))
         .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
