@@ -42,7 +42,7 @@ public class JSONParser
 		debugprint("String: ");
 
 		c = rd.read();
-		if (c!='\"') throw new JSONParseErrorException(String.valueOf((char)c), "\"");
+		if (c!='"') throw new JSONParseErrorException((char)c, '"');
 
 		escape = false;
 		while(c>=0) {
@@ -50,7 +50,10 @@ public class JSONParser
 
 			if (escape) {
 				escape = false;
-				sb.append((char)c);
+				if (c=='r') { sb.append('\r'); }
+				else if (c=='n') { sb.append('\n'); }
+				else if (c=='t') { sb.append('\t'); }
+				else {	sb.append((char)c); }
 			} else {
 				if (c=='"') {
 					break;
@@ -150,7 +153,7 @@ public class JSONParser
 
 		readWhiteSpace(rd);
 		c = rd.read();
-		if (c!=':') throw new JSONParseErrorException(String.valueOf(c), ":");
+		if (c!=':') throw new JSONParseErrorException((char)c, ':');
 		
 		readWhiteSpace(rd);
 
@@ -210,7 +213,7 @@ public class JSONParser
 		debugprint("Array <");
 		c = rd.read();
 
-		if (c!='[') throw new JSONParseErrorException(String.valueOf(c), "[");
+		if (c!='[') throw new JSONParseErrorException((char)c, '[');
 
 		readWhiteSpace(rd);
 		c = rd.read();
@@ -235,7 +238,7 @@ public class JSONParser
 				return jsonary;	//end of Array
 			}
 			else {
-				throw new JSONParseErrorException(String.valueOf(c), ", or ]");
+				throw new JSONParseErrorException(String.valueOf((char)c), ", or ]");
 			}
 		}
 
@@ -256,7 +259,7 @@ public class JSONParser
 		debugprint("Object <");
 		c = rd.read();
 
-		if (c!='{') throw new JSONParseErrorException(String.valueOf(c), "{");
+		if (c!='{') throw new JSONParseErrorException((char)c, '{');
 
 		
 		readWhiteSpace(rd);
@@ -281,7 +284,7 @@ public class JSONParser
 				return jsonobj;	//end of Object
 			}
 			else {
-				throw new JSONParseErrorException(String.valueOf(c), ", or }");
+				throw new JSONParseErrorException(String.valueOf((char)c), ", or }");
 			}
 		}
 
