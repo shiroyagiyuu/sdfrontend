@@ -4,7 +4,16 @@ import java.io.*;
 
 public class JSONParser
 {
-	private static void readWhiteSpace(PushbackReader rd) throws IOException {
+	static JSONParser  instance = null;
+
+	boolean debug = false;
+
+	/**
+	 * skip Whitespace
+	 * @param rd
+	 * @throws IOException
+	 */
+	private void readWhiteSpace(PushbackReader rd) throws IOException {
 		int  c;
 
 		c = rd.read();
@@ -26,11 +35,11 @@ public class JSONParser
 	/**
 	 * Stringをリードする。
 	 */
-	private static String readString(PushbackReader rd) throws IOException {
+	private String readString(PushbackReader rd) throws IOException {
 		int  c;
 		boolean  escape;
 		StringBuilder  sb = new StringBuilder();
-		System.out.print("String: ");
+		debugprint("String: ");
 
 		c = rd.read();
 		if (c!='\"') throw new JSONParseErrorException(String.valueOf(c), "\"");
@@ -53,11 +62,16 @@ public class JSONParser
 				}
 			}
 		}
-		System.out.println(sb.toString());
+		debugprint(sb.toString());
 		return sb.toString();
 	}
 
-	private static boolean isNumber(int c) {
+	/**
+	 * check, is char Number
+	 * @param c
+	 * @return
+	 */
+	private boolean isNumber(int c) {
 		if ('0'<=c && c<='9') return true;
 		if (c=='.') return true;
 		if (c=='-') return true;
@@ -65,10 +79,16 @@ public class JSONParser
 		return false;
 	}
 
-	private static Object readNumber(PushbackReader rd) throws IOException {
+	/**
+	 * read Number
+	 * @param rd
+	 * @return
+	 * @throws IOException
+	 */
+	private Object readNumber(PushbackReader rd) throws IOException {
 		int c;
 		StringBuilder  sb = new StringBuilder();
-		System.out.println("Number");
+		debugprint("Number");
 
 		c = rd.read();
 		while(c>=0 && isNumber(c)) {
@@ -84,8 +104,13 @@ public class JSONParser
 		}
 	}
 
+	/**
+	 * Read Keyword. true,false,null
+	 * @param rd
+	 * @return JSON Object
+	 * @throws IOException
+	 */
 	private static Object readKeyword(PushbackReader rd) throws IOException {
-		int  c;
 		StringBuilder sb = new StringBuilder();
 
 		sb.append((char)rd.read());
@@ -109,11 +134,17 @@ public class JSONParser
 		throw new JSONParseErrorException(sb.toString(), "true,false,null");
 	}
 
-	private static JSONMember readMember(PushbackReader rd) throws IOException {
+	/**
+	 * Read member
+	 * @param rd
+	 * @return member (key:value)
+	 * @throws IOException
+	 */
+	private JSONMember readMember(PushbackReader rd) throws IOException {
 		int  c;
 		String  key;
 		Object  value;
-		System.out.println("Member <");
+		debugprint("Member <");
 
 		key = readString(rd);
 
@@ -125,15 +156,21 @@ public class JSONParser
 
 		value = readElement(rd);
 
-		System.out.println("> Member");
+		debugprint("> Member");
 		return new JSONMember(key, value);
 	}
 
-	static Object readElement(PushbackReader rd) throws IOException {
+	/**
+	 * readElement (value)
+	 * @param rd
+	 * @return
+	 * @throws IOException
+	 */
+	Object readElement(PushbackReader rd) throws IOException {
 		int     c;
 		Object  obj;
 
-		System.out.println("Element <");
+		debugprint("Element <");
 		readWhiteSpace(rd);
 
 		c = rd.read();
@@ -157,15 +194,20 @@ public class JSONParser
 
 		readWhiteSpace(rd);
 
-		System.out.println("> Element");
+		debugprint("> Element");
 		return obj;
 	}
 
-	static JSONArray readArray(PushbackReader rd) throws IOException {
+	/**
+	 * @param rd
+	 * @return
+	 * @throws IOException
+	 */
+	JSONArray readArray(PushbackReader rd) throws IOException {
 		int  c;
 		JSONArray   jsonary = new JSONArray();
 
-		System.out.println("Array <");
+		debugprint("Array <");
 		c = rd.read();
 
 		if (c!='[') throw new JSONParseErrorException(String.valueOf(c), "[");
@@ -188,7 +230,7 @@ public class JSONParser
 				; //do nothing;
 			}
 			else if(c==']') {
-				System.out.println("> Array");
+				debugprint("> Array");
 				return jsonary;	//end of Array
 			}
 			else {
@@ -200,11 +242,17 @@ public class JSONParser
 		return jsonary;
 	}
 
-	static JSONObject readObject(PushbackReader rd) throws IOException {
+	/**
+	 * read JSONObject
+	 * @param rd
+	 * @return
+	 * @throws IOException
+	 */
+	JSONObject readObject(PushbackReader rd) throws IOException {
 		int  c;
 		JSONObject   jsonobj = new JSONObject();
 
-		System.out.println("Object <");
+		debugprint("Object <");
 		c = rd.read();
 
 		if (c!='{') throw new JSONParseErrorException(String.valueOf(c), "{");
@@ -227,7 +275,7 @@ public class JSONParser
 				; //do nothing;
 			}
 			else if(c=='}') {
-				System.out.println("> Object");
+				debugprint("> Object");
 				return jsonobj;	//end of Object
 			}
 			else {
@@ -239,17 +287,48 @@ public class JSONParser
 		return jsonobj;
 	}
 
-	public static JSONObject readJSON(Reader  rd) throws IOException {
+	public JSONObject readJSON(Reader  rd) throws IOException {
 		PushbackReader prd = new PushbackReader(rd);
 
 		readWhiteSpace(prd);
 		return readObject(prd);
 	}
 
+	/**
+	 * get Instance(singleton)
+	 * @return
+	 */
+	public static JSONParser getInstance() {
+		if (JSONParser.instance==null) {
+			JSONParser.instance = new JSONParser(false);
+		}
+
+		return JSONParser.instance;
+	}
+
+	/**
+	 * debug print
+	 * @param msg
+	 */
+	private void debugprint(String msg) {
+		if (debug) {
+			System.out.println(msg);
+		}
+	}
+
+	/**
+	 * constructor
+	 * @param debug
+	 */
+	JSONParser(boolean debug) {
+		this.debug = debug;
+	}
+
 	public static void main(String[] args) {
 		try {
 			File  file = new File(args[0]);
-			JSONParser.readJSON(new FileReader(file));
+			JSONParser  parser = JSONParser.getInstance();
+			parser.readJSON(new FileReader(file));
 		} catch(IOException ex) {
 			ex.printStackTrace();
 		}
