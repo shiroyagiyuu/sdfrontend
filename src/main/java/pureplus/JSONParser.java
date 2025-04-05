@@ -42,7 +42,7 @@ public class JSONParser
 		debugprint("String: ");
 
 		c = rd.read();
-		if (c!='\"') throw new JSONParseErrorException(String.valueOf(c), "\"");
+		if (c!='\"') throw new JSONParseErrorException(String.valueOf((char)c), "\"");
 
 		escape = false;
 		while(c>=0) {
@@ -55,7 +55,7 @@ public class JSONParser
 				if (c=='"') {
 					break;
 				} else if (c=='\\') {
-					sb.append((char)c);
+					//sb.append((char)c);
 					escape = true;
 				} else {
 					sb.append((char)c);
@@ -100,7 +100,7 @@ public class JSONParser
 		if (sb.indexOf(".")>0) {
 			return Double.valueOf(sb.toString());
 		} else {
-			return Integer.valueOf(sb.toString());
+			return Long.valueOf(sb.toString());
 		}
 	}
 
@@ -222,6 +222,7 @@ public class JSONParser
 		rd.unread(c);
 
 		while (c>0) {
+			readWhiteSpace(rd);
 			jsonary.add(readElement(rd));
 
 			c = rd.read();
@@ -268,6 +269,7 @@ public class JSONParser
 		rd.unread(c);
 
 		while (c>0) {
+			readWhiteSpace(rd);
 			jsonobj.add(readMember(rd));
 			c = rd.read();
 

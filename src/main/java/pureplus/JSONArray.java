@@ -17,5 +17,9 @@ public class JSONArray
 	public Object get(int i) {
 		return this.ary.get(i);
 	}
+
+	public int size() {
+		return this.ary.size();
+	}
 }
 
