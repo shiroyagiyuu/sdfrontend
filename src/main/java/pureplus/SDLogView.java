@@ -1,6 +1,10 @@
 package pureplus;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.*;
 import java.io.*;
 import java.util.*;
@@ -167,6 +171,27 @@ public class SDLogView
 		imageview = new SDImageView();
 		imageview.setSize(new Dimension(512,512));
 		//pane.add(imageview, BorderLayout.EAST);
+
+		imageview.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
+			public void keyPressed(java.awt.event.KeyEvent e) {
+				switch (e.getKeyCode()) {
+					case KeyEvent.VK_LEFT:
+						previousRow();
+						break;
+					case KeyEvent.VK_RIGHT:
+						nextRow();
+						break;
+				}
+			}
+		});
+
+		imageview.addMouseListener(new java.awt.event.MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				imageview.requestFocus();
+			}
+		});
 
 		JPanel  ctrlpane = new JPanel();
 		ctrlpane.add(new JLabel("curr:"));
