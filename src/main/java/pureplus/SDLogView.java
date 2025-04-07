@@ -2,6 +2,7 @@ package pureplus;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -172,9 +173,9 @@ public class SDLogView
 		imageview.setSize(new Dimension(512,512));
 		//pane.add(imageview, BorderLayout.EAST);
 
-		imageview.addKeyListener(new java.awt.event.KeyAdapter() {
+		imageview.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyPressed(java.awt.event.KeyEvent e) {
+			public void keyPressed(KeyEvent e) {
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_LEFT:
 						previousRow();
@@ -186,7 +187,7 @@ public class SDLogView
 			}
 		});
 
-		imageview.addMouseListener(new java.awt.event.MouseAdapter() {
+		imageview.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				imageview.requestFocus();

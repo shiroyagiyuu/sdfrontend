@@ -5,8 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.*;
 import java.net.http.*;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.Duration;
 
 public class SDClient {
@@ -20,19 +18,39 @@ public class SDClient {
         .build();
     }
 
-    void appendKeyPair(StringBuilder sb, String key, String value) {
+    void appendKeyPair(StringBuilder sb, String key, String value, boolean last) {
         sb.append("\"");
         sb.append(key);
         sb.append("\" : \"");
         sb.append(value);
         sb.append("\"");
+
+        if (last) {
+            sb.append("\n");
+        } else {
+            sb.append(",\n");
+        }
     }
 
-    void appendKeyPair(StringBuilder sb, String key, int value) {
+    void appendKeyPair(StringBuilder sb, String key, String value) {
+        appendKeyPair(sb, key, value, false);
+    }
+
+    void appendKeyPair(StringBuilder sb, String key, int value, boolean last) {
         sb.append("\"");
         sb.append(key);
         sb.append("\" : ");
         sb.append(String.valueOf(value));
+
+        if (last) {
+            sb.append("\n");
+        } else {
+            sb.append(",\n");
+        }
+    }
+
+    void appendKeyPair(StringBuilder sb, String key, int value) {
+        appendKeyPair(sb, key, value, false);
     }
 
     public String paramToJson(SDParam param) {
@@ -40,43 +58,39 @@ public class SDClient {
 
         sb.append("{\n");
         appendKeyPair(sb, "prompt",param.getPrompt());
-        sb.append(",\n");
         appendKeyPair(sb, "negative_prompt",param.getNegativePrompt());
-        sb.append(",\n");
         appendKeyPair(sb, "seed", (int)param.getSeed());
-        sb.append(",\n");
         appendKeyPair(sb, "steps", param.getSteps());
-        sb.append(",\n");
         appendKeyPair(sb, "width", param.getWidth());
-        sb.append(",\n");
         appendKeyPair(sb, "height", param.getHeight());
-        sb.append(",\n");
         appendKeyPair(sb, "cfg_scale", param.getCfgs());
-        sb.append(",\n");
         appendKeyPair(sb, "sampler_name", param.getSampler());
-        sb.append(",\n");
         appendKeyPair(sb, "n_iter", 1);
-        sb.append(",\n");
         appendKeyPair(sb, "batch_size", 1);
-        sb.append("\n");
+        sb.append("\"save_images\":true");
 
         sb.append("}");
 
         return sb.toString();
     }
 
-    public String request(SDParam param) throws IOException, InterruptedException, URISyntaxException {
-        String reqjson = paramToJson(param);
-        String uri = host + "/" + "sdapi/v1/txt2img";
+    public String request(SDParam param) throws IOException, InterruptedException {
+        try {
+            String reqjson = paramToJson(param);
+            String uri = host + "/" + "sdapi/v1/txt2img";
 
-        HttpRequest  request = HttpRequest.newBuilder(new URI(uri))
-        .POST(HttpRequest.BodyPublishers.ofString(reqjson))
-        .build();
+            HttpRequest  request = HttpRequest.newBuilder(new URI(uri))
+            .POST(HttpRequest.BodyPublishers.ofString(reqjson))
+            .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println(response.statusCode());
-        return response.body();
+            System.out.println(response.statusCode());
+            return response.body();
+        } catch(java.net.URISyntaxException ex) {
+            ex.printStackTrace();
+            return "";
+        }
     }
 
     public static void main(String[] args) throws Exception {
