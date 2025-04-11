@@ -231,10 +231,16 @@ public class JSONViewer {
                 FileInputStream   fis = new FileInputStream(new File(args[0]));
                 fis.read(bsize);
 
-                int  csize = bsize[0] + bsize[1]<<8 + bsize[2]<<16 + bsize[3]<<24;
+                int  csize = bsize[0] + (bsize[1] + (bsize[2] + (bsize[3]*256))*256)*256;
+                for (int i=0;i<bsize.length; i++) {
+                    System.out.println("bsize"+i+":"+bsize[i]);
+                }
+                System.out.println("csize="+csize);
 
                 byte[]  cont = new byte[csize];
                 fis.read(cont);
+
+                fis.close();
 
                 viewer.load(new ByteArrayInputStream(cont));
                 viewer.init();
