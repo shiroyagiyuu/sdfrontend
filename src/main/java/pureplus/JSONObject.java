@@ -53,5 +53,9 @@ public class JSONObject
 		}
 		return null;
 	}
+
+	public int size() {
+		return members.size();
+	}
 }
 
