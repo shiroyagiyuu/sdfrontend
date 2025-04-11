@@ -15,6 +15,9 @@ import javax.swing.event.TreeSelectionListener;
 
 import java.util.ArrayList;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 
 class JSONTreeModel implements TreeModel
 {
@@ -227,21 +230,23 @@ public class JSONViewer {
         if (args[0].endsWith(".safetensors")) {
             System.out.println("read SafeTensors");
             try {
-                byte[]  bsize = new byte[8];
+                ByteBuffer  sizebuf = ByteBuffer.allocate(8);
                 FileInputStream   fis = new FileInputStream(new File(args[0]));
-                fis.read(bsize);
+                FileChannel       fch = fis.getChannel();
+                fch.read(sizebuf);
 
-                int  csize = bsize[0] + (bsize[1] + (bsize[2] + (bsize[3]*256))*256)*256;
-                for (int i=0;i<bsize.length; i++) {
-                    System.out.println("bsize"+i+":"+bsize[i]);
-                }
+                sizebuf.order(ByteOrder.LITTLE_ENDIAN);
+                int  csize = (int)(sizebuf.flip().getLong());
                 System.out.println("csize="+csize);
 
-                byte[]  cont = new byte[csize];
-                fis.read(cont);
+                ByteBuffer   contbuf = ByteBuffer.allocate(csize);
+                fch.read(contbuf);
 
+                fch.close();
                 fis.close();
 
+                byte[]  cont = new byte[csize];
+                contbuf.flip().get(cont);
                 viewer.load(new ByteArrayInputStream(cont));
                 viewer.init();
             } catch(IOException ex) {
