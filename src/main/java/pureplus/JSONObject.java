@@ -53,23 +53,5 @@ public class JSONObject
 		}
 		return null;
 	}
-
-	public int getInt(String key) {
-		Object o;
-		o = get(key);
-		if (o instanceof Integer) {
-			return (int)o;
-		}
-		return 0;
-	}
-
-	public double getDouble(String key) {
-		Object o;
-		o = get(key);
-		if (o instanceof Double) {
-			return (double)o;
-		}
-		return 0.0;
-	}
 }
 

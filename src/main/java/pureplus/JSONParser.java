@@ -292,11 +292,16 @@ public class JSONParser
 		return jsonobj;
 	}
 
-	public JSONObject readJSON(Reader  rd) throws IOException {
+	public static JSONObject readJSONObject(Reader  rd) throws IOException {
 		PushbackReader prd = new PushbackReader(rd);
+		JSONParser     parser = getInstance();
 
-		readWhiteSpace(prd);
-		return readObject(prd);
+		parser.readWhiteSpace(prd);
+		return parser.readObject(prd);
+	}
+
+	public static JSONObject readJSON(Reader rd) throws IOException {
+		return readJSONObject(rd);
 	}
 
 	/**
@@ -332,8 +337,7 @@ public class JSONParser
 	public static void main(String[] args) {
 		try {
 			File  file = new File(args[0]);
-			JSONParser  parser = JSONParser.getInstance();
-			parser.readJSON(new FileReader(file));
+			JSONParser.readJSON(new FileReader(file));
 		} catch(IOException ex) {
 			ex.printStackTrace();
 		}

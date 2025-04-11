@@ -49,7 +49,6 @@ public class SDQueClient {
     class RequestThread extends Thread {
         @Override
         public void run() {
-            JSONParser  parser = JSONParser.getInstance();
             while (running) {
                 try {
                     if (que.size()>0) {
@@ -57,7 +56,7 @@ public class SDQueClient {
 
                         String      response = client.request(param);
 
-                        JSONObject  resobj = parser.readJSON(new StringReader(response));
+                        JSONObject  resobj = JSONParser.readJSON(new StringReader(response));
                         logger.writeResponse(resobj);
                     }
                     else {

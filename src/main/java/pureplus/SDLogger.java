@@ -101,7 +101,7 @@ public class SDLogger {
     public void writeResponse(JSONObject obj) throws IOException {
         JSONArray   images = (JSONArray)obj.get("images");
         String      infostr = (String)obj.get("info");
-        JSONObject  infoobj = JSONParser.getInstance().readJSON(new StringReader(infostr));
+        JSONObject  infoobj = JSONParser.readJSONObject(new StringReader(infostr));
         long        seed = (long)(infoobj.get("seed"));
 
         int  num = images.size();
@@ -123,14 +123,9 @@ public class SDLogger {
     }
 
     public void request() {
-        String      resp;
-        JSONParser  parser;
-
-        parser = JSONParser.getInstance();
-
         try {
-            resp = client.request(this.param);
-            JSONObject  obj = parser.readJSON(new StringReader(resp));
+            String resp = client.request(this.param);
+            JSONObject  obj = JSONParser.readJSON(new StringReader(resp));
 
             writeResponse(obj);
         } catch(IOException ex) {
