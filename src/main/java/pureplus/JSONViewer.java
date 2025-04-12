@@ -216,8 +216,46 @@ public class JSONViewer {
         frm.setVisible(true);
     }
 
+    Reader getSafetensorReader(File file) throws IOException {
+        ByteBuffer  sizebuf = ByteBuffer.allocate(8);
+        FileInputStream   fis = new FileInputStream(file);
+        FileChannel       fch = fis.getChannel();
+
+        fch.read(sizebuf);
+
+        sizebuf.order(ByteOrder.LITTLE_ENDIAN);
+        int  csize = (int)(sizebuf.flip().getLong());
+        System.out.println("csize="+csize);
+
+        ByteBuffer   contbuf = ByteBuffer.allocate(csize);
+        fch.read(contbuf);
+
+        fch.close();
+        fis.close();
+
+        byte[]  cont = new byte[csize];
+        contbuf.flip().get(cont);
+        return new InputStreamReader(new ByteArrayInputStream(cont));
+    }
+
+
     public void load(File file) throws IOException {
-        jsonobj = JSONParser.readJSONObject(new FileReader(file));
+        if (file.getName().endsWith(".safetensors")) {
+            System.out.println("read SafeTensors");
+            Reader rd = getSafetensorReader(file);
+            load(rd);
+        } else {
+            System.out.println("read JSON");
+            load(new FileReader(file));
+        }
+    }
+
+    public void load(String path) throws IOException {
+        load(new File(path));
+    }
+
+    public void load(Reader rd) throws IOException {
+        jsonobj = JSONParser.readJSONObject(rd);
     }
 
     public void load(InputStream in) throws IOException {
@@ -227,39 +265,11 @@ public class JSONViewer {
     public static void main(String[] args) {
         JSONViewer  viewer = new JSONViewer();
 
-        if (args[0].endsWith(".safetensors")) {
-            System.out.println("read SafeTensors");
-            try {
-                ByteBuffer  sizebuf = ByteBuffer.allocate(8);
-                FileInputStream   fis = new FileInputStream(new File(args[0]));
-                FileChannel       fch = fis.getChannel();
-                fch.read(sizebuf);
-
-                sizebuf.order(ByteOrder.LITTLE_ENDIAN);
-                int  csize = (int)(sizebuf.flip().getLong());
-                System.out.println("csize="+csize);
-
-                ByteBuffer   contbuf = ByteBuffer.allocate(csize);
-                fch.read(contbuf);
-
-                fch.close();
-                fis.close();
-
-                byte[]  cont = new byte[csize];
-                contbuf.flip().get(cont);
-                viewer.load(new ByteArrayInputStream(cont));
-                viewer.init();
-            } catch(IOException ex) {
-                ex.printStackTrace();
-            }
-        } else {
-            System.out.println("read JSON");
-            try {
-                viewer.load(new File(args[0]));
-                viewer.init();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+        try {
+            viewer.load(args[0]);
+            viewer.init();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 }
