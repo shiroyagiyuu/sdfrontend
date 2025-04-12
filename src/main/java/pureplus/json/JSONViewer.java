@@ -18,7 +18,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.filechooser.FileFilter;
 
 import java.util.ArrayList;
 import java.io.*;
