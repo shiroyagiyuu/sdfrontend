@@ -1,4 +1,4 @@
-package pureplus;
+package pureplus.json;
 
 public class JSONMember
 {

@@ -6,6 +6,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Base64;
+import pureplus.json.JSONObject;
+import pureplus.json.JSONArray;
+import pureplus.json.JSONParser;
+
 
 public class SDLogger {
     SDControlPanel  sp;

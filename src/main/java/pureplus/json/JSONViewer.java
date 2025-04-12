@@ -1,4 +1,4 @@
-package pureplus;
+package pureplus.json;
 
 import java.awt.Component;
 import javax.swing.JTree;
