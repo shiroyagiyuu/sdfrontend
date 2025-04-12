@@ -1,2 +1,2 @@
-java -cp target\classes pureplus.JSONViewer %1
+java -cp target\classes pureplus.json.JSONViewer %1
 pause

@@ -1,6 +1,6 @@
-import pureplus.*;
+import pureplus.json.*;
 import java.io.File;
 
 JSONViewer   viewer = new JSONViewer();
-viewer.load("out.json");
 viewer.init();
+viewer.load("out.json");

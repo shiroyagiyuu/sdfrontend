@@ -1,8 +1,14 @@
 package pureplus.json;
 
 import java.awt.Component;
+import java.awt.Dimension;
+
 import javax.swing.JTree;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -12,6 +18,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileFilter;
 
 import java.util.ArrayList;
 import java.io.*;
@@ -174,16 +181,60 @@ class JSONTreeRenderer extends DefaultTreeCellRenderer
 
 public class JSONViewer {
     JFrame      frm;
+    JTree       tree;
     JSONObject  jsonobj;
 
     JTextArea   ta;
+
+    JFileChooser  fchooser;
+
+    public void openFile() {
+        if (fchooser == null) {
+            fchooser = new JFileChooser();
+        }
+
+        int  res = fchooser.showOpenDialog(frm);
+
+        if (res == JFileChooser.APPROVE_OPTION) {
+            try {
+                load(fchooser.getSelectedFile());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public void quit() {
+        frm.dispose();
+        System.exit(0);
+    }
+
+    public JMenuBar initMenuBar() {
+        JMenuBar  menubar = new JMenuBar();
+        
+        JMenu   filemenu = new JMenu("File");
+        JMenuItem    mopen = new JMenuItem("Open");
+        mopen.addActionListener(e -> {
+            openFile();
+        });
+        filemenu.add(mopen);
+
+        JMenuItem    mquit = new JMenuItem("Quit");
+        mquit.addActionListener(e -> {
+            quit();
+        });
+        filemenu.add(mquit);
+
+        menubar.add(filemenu);
+
+        return menubar;
+    }
 
     public void init() {
         frm = new JFrame("JSON Viewer");
         frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        JSONTreeModel  model = new JSONTreeModel(jsonobj);
-        JTree  tree = new JTree(model);
+        tree = new JTree();
         tree.setCellRenderer(new JSONTreeRenderer());
         tree.setEditable(false);
         JScrollPane   tree_scpane = new JScrollPane(tree, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -211,7 +262,8 @@ public class JSONViewer {
         JSplitPane  splpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tree_scpane, ta_scpane);
 
         frm.setContentPane(splpane);
-        frm.pack();
+        frm.setJMenuBar(initMenuBar());
+        frm.setSize(new Dimension(600,400));
 
         frm.setVisible(true);
     }
@@ -238,6 +290,14 @@ public class JSONViewer {
         return new InputStreamReader(new ByteArrayInputStream(cont));
     }
 
+    public void load(Reader rd) throws IOException {
+        jsonobj = JSONParser.readJSONObject(rd);
+        tree.setModel(new JSONTreeModel(jsonobj));
+    }
+
+    public void load(InputStream in) throws IOException {
+        load(new InputStreamReader(in));
+    }
 
     public void load(File file) throws IOException {
         if (file.getName().endsWith(".safetensors")) {
@@ -254,20 +314,14 @@ public class JSONViewer {
         load(new File(path));
     }
 
-    public void load(Reader rd) throws IOException {
-        jsonobj = JSONParser.readJSONObject(rd);
-    }
-
-    public void load(InputStream in) throws IOException {
-        jsonobj = JSONParser.readJSONObject(new InputStreamReader(in));
-    }
-
     public static void main(String[] args) {
         JSONViewer  viewer = new JSONViewer();
 
         try {
-            viewer.load(args[0]);
             viewer.init();
+            if (args.length>1) {
+                viewer.load(args[0]);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
