@@ -12,19 +12,10 @@ import pureplus.json.JSONParser;
 
 
 public class SDLogger {
-    SDControlPanel  sp;
-    SDClient        client;
-    SDParam         param;
-
     File    logdir,logfile;
     int     image_num;
 
     void init() {
-        client = new SDClient();
-    }
-
-    public void setParam(SDParam param) {
-        this.param = param;
     }
 
     public void setLogdir(String path) {
@@ -123,19 +114,6 @@ public class SDLogger {
                 System.out.println("skip: "+i);
                 ex.printStackTrace();
             }
-        }
-    }
-
-    public void request() {
-        try {
-            String resp = client.request(this.param);
-            JSONObject  obj = JSONParser.readJSON(new StringReader(resp));
-
-            writeResponse(obj);
-        } catch(IOException ex) {
-            ex.printStackTrace();
-        } catch(Exception ex) {
-            ex.printStackTrace();
         }
     }
 

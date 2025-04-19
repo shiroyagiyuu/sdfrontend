@@ -6,7 +6,7 @@ import pureplus.json.JSONObject;
 import pureplus.json.JSONParser;
 
 public class SDQueClient {
-    private LinkedList<SDParam>     que;
+    private LinkedList<JSONObject>     que;
     private Object  monitor;
     private SDClient  client;
     private SDLogger  logger;
@@ -19,7 +19,7 @@ public class SDQueClient {
      * add param to que
      * @param param キューに挿入するパラメーター
      */
-    public void addRequestQue(SDParam param) {
+    public void addRequestQue(JSONObject param) {
         que.addLast(param);
         synchronized(monitor) {
             monitor.notify();
@@ -54,7 +54,7 @@ public class SDQueClient {
             while (running) {
                 try {
                     if (que.size()>0) {
-                        SDParam     param = que.pollFirst();
+                        JSONObject  param = que.pollFirst();
 
                         String      response = client.request(param);
 
@@ -76,7 +76,7 @@ public class SDQueClient {
     }
 
     public SDQueClient() {
-        que = new LinkedList<SDParam>();
+        que = new LinkedList<JSONObject>();
         logger = new SDLogger();
         monitor = new Object();
         client = new SDClient();
