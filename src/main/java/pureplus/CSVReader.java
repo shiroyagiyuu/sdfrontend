@@ -2,6 +2,7 @@ package pureplus;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CSVReader
 {
@@ -124,6 +125,16 @@ public class CSVReader
 		nextLine();
 
 		return ary.toArray(new String[ary.size()]);
+	}
+
+	public List<String[]> readAll() throws IOException {
+		ArrayList<String[]>	tbl = new ArrayList<String[]>();
+
+		while(isAvailable()) {
+			tbl.add(readRow());
+		}
+
+		return tbl;
 	}
 
 	public void close() throws IOException {
