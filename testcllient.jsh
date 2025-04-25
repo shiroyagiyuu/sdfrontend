@@ -12,7 +12,7 @@ param.add("height", 512);
 param.add("cfg_scale", 7);
 param.add("sampler_name", "DPM++ 2M");
 
-//String resp = client.request(param);
+//String resp = client.txt2img(param);
 
 client.setLogdir("log");
 

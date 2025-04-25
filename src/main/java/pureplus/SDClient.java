@@ -21,10 +21,14 @@ public class SDClient {
         .build();
     }
 
-    public String request(JSONObject param) throws IOException, InterruptedException {
+    public String txt2img(JSONObject param) throws IOException, InterruptedException {
+        return request("sdapi/v1/txt2img", param);
+    }
+
+    public String request(String sdcmd, JSONObject param) throws IOException, InterruptedException {
         try {
             String reqjson = JSONWriter.toJSON(param);
-            String uri = host + "/" + "sdapi/v1/txt2img";
+            String uri = host + "/" + sdcmd;
 
             HttpRequest  request = HttpRequest.newBuilder(new URI(uri))
             .POST(HttpRequest.BodyPublishers.ofString(reqjson))
@@ -56,7 +60,7 @@ public class SDClient {
         param.add("batch_size",1);
         param.add("save_images", false);
         
-        String resp = client.request(param);
+        String resp = client.txt2img(param);
 
         try {
             File outfile = new File("out.json");
