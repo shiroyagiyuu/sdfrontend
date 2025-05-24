@@ -155,6 +155,12 @@ public class SDLogView
 		syncRow();
 	}
 
+	public void gotoCurrent() {
+		String row = fld_curr.getText(); 
+		int    rint = Integer.parseInt(row);
+		setCurrRow(rint);
+	}
+
 	public void setBaseDir(File file) {
 		this.basedir = file;
 	}
@@ -197,15 +203,23 @@ public class SDLogView
 		JPanel  ctrlpane = new JPanel();
 		ctrlpane.add(new JLabel("curr:"));
 		fld_curr = new JTextField(4);
+		fld_curr.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				switch (e.getKeyCode()) {
+					case KeyEvent.VK_ENTER:
+					gotoCurrent();
+					break;
+				}
+			}
+		});
 		ctrlpane.add(fld_curr);
 		max_label = new JLabel("/0");
 		ctrlpane.add(max_label);
 
 		JButton  set_btn = new JButton("Set");
 		set_btn.addActionListener(e -> { 
-			String row = fld_curr.getText(); 
-			int    rint = Integer.parseInt(row);
-			setCurrRow(rint);
+			gotoCurrent();
 		});
 		ctrlpane.add(set_btn);
 
