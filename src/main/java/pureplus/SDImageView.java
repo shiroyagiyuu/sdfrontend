@@ -11,10 +11,16 @@ class SDImageView extends JComponent
 	File	file;
 
 	public void paint(Graphics g) {
-		Rectangle  bounds = g.getClipBounds();
+		Graphics2D  g2d;
 
-		g.setColor(Color.lightGray);
-		g.fillRect(0, 0, bounds.width, bounds.height);
+		g2d = (Graphics2D)g;
+
+		g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+		Rectangle  bounds = g2d.getClipBounds();
+
+		g2d.setColor(Color.lightGray);
+		g2d.fillRect(0, 0, bounds.width, bounds.height);
 
 		if (image!=null) {
 
@@ -32,7 +38,7 @@ class SDImageView extends JComponent
 				int   draw_x = (bounds.width - draw_w)/2;
 				int   draw_y = (bounds.height - draw_h)/2;
 	
-				g.drawImage(image, draw_x, draw_y, draw_w, draw_h, this);
+				g2d.drawImage(image, draw_x, draw_y, draw_w, draw_h, this);
 			}
 		}
 	}
