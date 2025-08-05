@@ -32,7 +32,12 @@ public class SDControlPanel
 		label.setLabelFor(prompt);
 
 		pane.add(label);
-		pane.add(prompt);
+
+		JScrollPane scprompt = new JScrollPane(prompt, 
+						ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+		pane.add(scprompt);
 
 		label = new JLabel("Negative Prompt");
 		//label.setAlignmentX(JLabel.LEFT_ALIGNMENT);
@@ -40,7 +45,12 @@ public class SDControlPanel
 		negative_prompt = new JTextArea(5,30);
 		negative_prompt.setLineWrap(true);
 		negative_prompt.setWrapStyleWord(true);
-		pane.add(negative_prompt);
+
+		JScrollPane scnegprompt = new JScrollPane(negative_prompt, 
+						ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+		pane.add(scnegprompt);
 
 		JPanel  ctrl_a = new JPanel();
 		
