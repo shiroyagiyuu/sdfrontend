@@ -15,8 +15,10 @@ public class SDLogView
 	SDControlPanel		ctrl;
 	JTextField			fld_curr;
 	JLabel				max_label;
+	JTextField			filter_fld;
 	SDImageView			imageview;
-	ArrayList<SDLog>	log;
+	ArrayList<SDLog>	flog, srclog;
+	SDLogFilter			filter;
 	
 	File				basedir;
 	File				logfile;
@@ -107,7 +109,6 @@ public class SDLogView
 					nlog.add(param);
 				}
 			}
-			max_label.setText("/"+(nlog.size()-1));
 		} catch(IOException ex) {
 			ex.printStackTrace();
 		} catch(Exception ex) {
@@ -118,15 +119,21 @@ public class SDLogView
 		return nlog; 
 	}
 
+	void updateMax() {
+		int  total = srclog.size()-1;
+		int  filterd = flog.size()-1;
+		max_label.setText("/"+(filterd)+"("+(total)+")");
+	}
+
 	void syncRow() {
-		if (curr_row < 0 || curr_row >= log.size()) {
-			curr_row = 0;
+		if (curr_row < 0 || curr_row >= flog.size()) {
+			curr_row = flog.size()-1;
 		}
 
-		ctrl.setSDLogData(log.get(curr_row));
+		ctrl.setSDLogData(flog.get(curr_row));
 		fld_curr.setText(String.valueOf(curr_row));
 
-		SDLog  p = log.get(curr_row);
+		SDLog  p = flog.get(curr_row);
 		imageview.setImage(new File(basedir,p.getFilename()));
 	}
 
@@ -136,7 +143,7 @@ public class SDLogView
 	}
 
 	public void nextRow() {
-		if (curr_row >= log.size()-1) {
+		if (curr_row >= flog.size()-1) {
 			curr_row = 0;
 		} else {
 			curr_row++;
@@ -147,7 +154,7 @@ public class SDLogView
 
 	public void previousRow() {
 		if (curr_row==0) {
-			curr_row = log.size()-1;
+			curr_row = flog.size()-1;
 		} else {
 			curr_row--;
 		}
@@ -200,7 +207,12 @@ public class SDLogView
 			}
 		});
 
-		JPanel  ctrlpane = new JPanel();
+		/* top Control */
+		JPanel  topctrlpane = new JPanel();
+		topctrlpane.setLayout(new BoxLayout(topctrlpane, BoxLayout.Y_AXIS));
+
+		JPanel	ctrlpane = new JPanel();
+
 		ctrlpane.add(new JLabel("curr:"));
 		fld_curr = new JTextField(4);
 		fld_curr.addKeyListener(new KeyAdapter() {
@@ -213,7 +225,9 @@ public class SDLogView
 				}
 			}
 		});
+
 		ctrlpane.add(fld_curr);
+
 		max_label = new JLabel("/0");
 		ctrlpane.add(max_label);
 
@@ -237,7 +251,21 @@ public class SDLogView
 		reload_btn.addActionListener(e -> { reloadLog(); });
 		ctrlpane.add(reload_btn);
 
-		pane.add(ctrlpane,BorderLayout.NORTH);
+		topctrlpane.add(ctrlpane);
+
+		/* filter */
+
+		JPanel   filterpane = new JPanel();
+		filter_fld = new JTextField(20);
+		filterpane.add(filter_fld);
+
+		JButton  filtset_btn = new JButton("Filter Set");
+		filtset_btn.addActionListener(e-> { filterSet(); });
+		filterpane.add(filtset_btn);
+
+		topctrlpane.add(filterpane);
+
+		pane.add(topctrlpane,BorderLayout.NORTH);
 
 		JSplitPane sppane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 										pane,imageview);
@@ -262,13 +290,25 @@ public class SDLogView
 	public void reloadLog() {
 		try {
 			Reader  rd = new FileReader(logfile);
-			log = readLog(rd);
+			srclog = readLog(rd);
+			filter = new SDLogFilter(srclog);
+			flog = srclog;
 
+			curr_row = flog.size()-1;
+
+			updateMax();
 			syncRow();
-
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public void filterSet() {
+		filter.setFilter(filter_fld.getText());
+		flog = filter.getFilteredList();
+
+		updateMax();
+		syncRow();
 	}
 
 	public static void main(String[] args) {

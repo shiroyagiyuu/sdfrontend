@@ -1,5 +1,7 @@
 package pureplus;
 
+import java.awt.BorderLayout;
+
 import javax.swing.*;
 
 public class SDControlPanel
@@ -20,10 +22,13 @@ public class SDControlPanel
 	JTextField  filename;
 
 	public JComponent createPane() {
-		JPanel  pane = new JPanel();
+		JPanel  toppane = new JPanel();
 
-		pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
+		toppane.setLayout(new BorderLayout());
 
+		/* Prompt Pane */
+		JPanel	prompt_pane = new JPanel();
+		prompt_pane.setLayout(new BoxLayout(prompt_pane, BoxLayout.Y_AXIS));
 
 		JLabel label = new JLabel("Prompt");
 		prompt = new JTextArea(5,30);
@@ -31,17 +36,17 @@ public class SDControlPanel
 		prompt.setWrapStyleWord(true);
 		label.setLabelFor(prompt);
 
-		pane.add(label);
+		prompt_pane.add(label);
 
 		JScrollPane scprompt = new JScrollPane(prompt, 
 						ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		pane.add(scprompt);
+		prompt_pane.add(scprompt);
 
 		label = new JLabel("Negative Prompt");
 		//label.setAlignmentX(JLabel.LEFT_ALIGNMENT);
-		pane.add(label);
+		prompt_pane.add(label);
 		negative_prompt = new JTextArea(5,30);
 		negative_prompt.setLineWrap(true);
 		negative_prompt.setWrapStyleWord(true);
@@ -50,12 +55,18 @@ public class SDControlPanel
 						ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		pane.add(scnegprompt);
+		prompt_pane.add(scnegprompt);
+
+		toppane.add(prompt_pane, BorderLayout.CENTER);
+
+		/* Control Pane */
+		JPanel	ctrl_pane = new JPanel();
+		ctrl_pane.setLayout(new BoxLayout(ctrl_pane, BoxLayout.Y_AXIS));
 
 		JPanel  ctrl_a = new JPanel();
 		
 		ctrl_a.add(new JLabel("Seed:"));
-		seed = new JTextField(20);
+		seed = new JTextField(10);
 		ctrl_a.add(seed);
 
 		ctrl_a.add(new JLabel("Width:"));
@@ -66,7 +77,7 @@ public class SDControlPanel
 		height = new JTextField(5);
 		ctrl_a.add(height);
 
-		pane.add(ctrl_a);
+		ctrl_pane.add(ctrl_a);
 
 		JPanel ctrl_b = new JPanel();
 
@@ -82,7 +93,7 @@ public class SDControlPanel
 		steps = new JTextField(3);
 		ctrl_b.add(steps);
 
-		pane.add(ctrl_b);
+		ctrl_pane.add(ctrl_b);
 
 		JPanel  model_pane = new JPanel();
 
@@ -94,7 +105,7 @@ public class SDControlPanel
 		sd_model_hash = new JTextField(20);
 		model_pane.add(sd_model_hash);
 
-		pane.add(model_pane);
+		ctrl_pane.add(model_pane);
 
 		JPanel  img_pane = new JPanel();
 
@@ -102,9 +113,11 @@ public class SDControlPanel
 		filename = new JTextField(32);
 		img_pane.add(filename);
 
-		pane.add(img_pane);
+		ctrl_pane.add(img_pane);
 
-		return pane;
+		toppane.add(ctrl_pane, BorderLayout.SOUTH);
+
+		return toppane;
 	}
 
 	public void setSDLogData(SDLog param) {
@@ -112,7 +125,7 @@ public class SDControlPanel
 		negative_prompt.setText(param.getNegativePrompt());
 		seed.setText(String.valueOf(param.getSeed()));
 		width.setText(String.valueOf(param.getWidth()));
-		height.setText(String.valueOf(param.getWidth()));
+		height.setText(String.valueOf(param.getHeight()));
 		sampler.setText(param.getSampler());
 		cfgs.setText(Integer.toString(param.getCfgs()));
 		steps.setText(Integer.toString(param.getSteps()));
