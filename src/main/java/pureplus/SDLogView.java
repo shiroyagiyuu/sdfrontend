@@ -2,6 +2,7 @@ package pureplus;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -257,6 +258,14 @@ public class SDLogView
 
 		JPanel   filterpane = new JPanel();
 		filter_fld = new JTextField(20);
+		filter_fld.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode()==KeyEvent.VK_ENTER) {
+					filterSet();
+				}
+			}
+		});
 		filterpane.add(filter_fld);
 
 		JButton  filtset_btn = new JButton("Filter Set");
