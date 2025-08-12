@@ -272,6 +272,10 @@ public class SDLogView
 		filtset_btn.addActionListener(e-> { filterSet(); });
 		filterpane.add(filtset_btn);
 
+		JButton  statistics_btn = new JButton("Statistics");
+		statistics_btn.addActionListener(e->{openStatistics();});
+		filterpane.add(statistics_btn);
+
 		topctrlpane.add(filterpane);
 
 		pane.add(topctrlpane,BorderLayout.NORTH);
@@ -318,6 +322,20 @@ public class SDLogView
 
 		updateMax();
 		syncRow();
+	}
+
+	SDPromptStatistics  statistics=new SDPromptStatistics();
+
+	public void openStatistics() {
+		String[]  prompts = new String[srclog.size()];
+
+		for (int i=0; i<prompts.length; i++) {
+			prompts[i] = srclog.get(i).getPrompt();
+		}
+
+		statistics.setPrompts(prompts);
+		statistics.createWindow();
+		statistics.setVisible(true);
 	}
 
 	public static void main(String[] args) {
