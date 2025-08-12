@@ -93,9 +93,10 @@ public class SDPromptStatistics {
                 table = new JTable(model);
                 JScrollPane  sptable = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-                frame = new JFrame();
+                frame = new JFrame("Prompt Statistics");
                 frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 frame.setContentPane(sptable);
+                frame.pack();
             }
         } else {
             System.out.println("Nothing to Do...(PromptStatistics)");
@@ -133,6 +134,7 @@ public class SDPromptStatistics {
 
         if (table!=null) {
             table.setModel(model);
+            frame.pack();
         }
     }
 
