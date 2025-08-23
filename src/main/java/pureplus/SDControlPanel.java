@@ -1,6 +1,8 @@
 package pureplus;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.*;
 
@@ -19,12 +21,65 @@ public class SDControlPanel
 	JTextField  sd_model_name;
 	JTextField  sd_model_hash;
 
+	JPopupMenu  prompt_popup;
+
 	JTextField  filename;
+
+	class PopupListener extends MouseAdapter
+	{
+			@Override
+			public void mousePressed(MouseEvent e) {
+				checkPopup(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				checkPopup(e);
+			}
+
+			void checkPopup(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					prompt_popup.show(e.getComponent(),e.getX(),e.getY());
+				}
+			}
+		}
 
 	public JComponent createPane() {
 		JPanel  toppane = new JPanel();
 
 		toppane.setLayout(new BorderLayout());
+
+		/* Prompt Popup */
+		prompt_popup = new JPopupMenu();
+		JMenuItem  cut_menu = new JMenuItem("cut");
+		cut_menu.addActionListener(e->{
+			Object  inv = prompt_popup.getInvoker();
+			if (inv instanceof JTextArea) {
+				JTextArea  ta = (JTextArea)inv;
+				ta.cut();
+			}
+		});
+		prompt_popup.add(cut_menu);
+		JMenuItem  copy_menu = new JMenuItem("copy");
+		copy_menu.addActionListener(e->{
+			Object  inv = prompt_popup.getInvoker();
+			if (inv instanceof JTextArea) {
+				JTextArea  ta = (JTextArea)inv;
+				ta.copy();
+			}
+		});
+		prompt_popup.add(copy_menu);
+		JMenuItem  paste_menu = new JMenuItem("paste");
+		paste_menu.addActionListener(e->{
+			Object  inv = prompt_popup.getInvoker();
+			if (inv instanceof JTextArea) {
+				JTextArea  ta = (JTextArea)inv;
+				ta.paste();
+			}
+		});
+		prompt_popup.add(paste_menu);
+
+		PopupListener  popupListener = new PopupListener();
 
 		/* Prompt Pane */
 		JPanel	prompt_pane = new JPanel();
@@ -35,6 +90,7 @@ public class SDControlPanel
 		prompt.setLineWrap(true);
 		prompt.setWrapStyleWord(true);
 		label.setLabelFor(prompt);
+		prompt.addMouseListener(popupListener);
 
 		prompt_pane.add(label);
 
@@ -50,6 +106,7 @@ public class SDControlPanel
 		negative_prompt = new JTextArea(5,30);
 		negative_prompt.setLineWrap(true);
 		negative_prompt.setWrapStyleWord(true);
+		negative_prompt.addMouseListener(popupListener);
 
 		JScrollPane scnegprompt = new JScrollPane(negative_prompt, 
 						ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
