@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CSVReader
+public class CSVReader implements AutoCloseable
 {
 	Reader  rd;
 	char	buffer[];

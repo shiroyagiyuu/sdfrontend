@@ -50,104 +50,77 @@ public class SDLogDBConvert {
         }
     }
 
-    private int insertPrompt(SDLog prompt, int sd_model) {
+    private int insertPrompt(Connection connection, SDLog prompt, int sd_model) throws SQLException {
         String insertQuery = "INSERT INTO prompt (prompt, negative_prompt, seed, width, height, sampler, cfgs, steps, sd_model) VALUES (?,?,?,?,?,?,?,?,?);";
         int    res_id = -1;
 
-        try (Connection connection = DriverManager.getConnection(getDBName())) {
-            try (PreparedStatement pstmt = connection.prepareStatement(insertQuery)) {
-                pstmt.setString(1,prompt.getPrompt());
-                pstmt.setString(2,prompt.getNegativePrompt());
-                pstmt.setLong(3,prompt.getSeed());
-                pstmt.setInt(4,prompt.getWidth());
-                pstmt.setInt(5,prompt.getHeight());
-                pstmt.setString(6,prompt.getSampler());
-                pstmt.setInt(7, prompt.getCfgs());
-                pstmt.setInt(8, prompt.getSteps());
-                pstmt.setInt(9, sd_model);
+        try (PreparedStatement pstmt = connection.prepareStatement(insertQuery)) {
+            pstmt.setString(1,prompt.getPrompt());
+            pstmt.setString(2,prompt.getNegativePrompt());
+            pstmt.setLong(3,prompt.getSeed());
+            pstmt.setInt(4,prompt.getWidth());
+            pstmt.setInt(5,prompt.getHeight());
+            pstmt.setString(6,prompt.getSampler());
+            pstmt.setInt(7, prompt.getCfgs());
+            pstmt.setInt(8, prompt.getSteps());
+            pstmt.setInt(9, sd_model);
 
-                pstmt.executeUpdate();
+            pstmt.executeUpdate();
 
-                ResultSet rs = pstmt.getGeneratedKeys();
+            ResultSet rs = pstmt.getGeneratedKeys();
 
-                while(rs.next())
-                {
-                    // read the result set
-                    res_id = rs.getInt(1);
-                    //System.out.println("id = " + res_id);
-                }
-            } catch(SQLException ex) {
-                ex.printStackTrace(System.err);
+            while(rs.next())
+            {
+                // read the result set
+                res_id = rs.getInt(1);
+                //System.out.println("id = " + res_id);
             }
-        } catch(SQLException ex) {
-            ex.printStackTrace(System.err);
         }
 
         return res_id;
     }
 
-    private int insertSDModel(String sd_modelname, String sd_modelhash) {
+    private int insertSDModel(Connection connection, String sd_modelname, String sd_modelhash) throws SQLException {
         String selectQuery = "SELECT id FROM sdmodel WHERE sd_model_name = ? AND sd_model_hash = ?;";
         String insertQuery = "INSERT INTO sdmodel (sd_model_name, sd_model_hash) VALUES (?, ?);";
 
         int  id = -1;
 
-        try (Connection connection = DriverManager.getConnection(getDBName())) {
+        try (PreparedStatement pstmt_sel = connection.prepareStatement(selectQuery)) {
+            pstmt_sel.setString(1, sd_modelname);
+            pstmt_sel.setString(2, sd_modelhash);
 
-            try (PreparedStatement pstmt_sel = connection.prepareStatement(selectQuery)) {
-                pstmt_sel.setString(1, sd_modelname);
-                pstmt_sel.setString(2, sd_modelhash);
+            ResultSet  rs = pstmt_sel.executeQuery();
+            if (rs.next()) {
+                // Found
+                id = rs.getInt("id");
+            } else {
+                // Not Found (new Model)
+                try (PreparedStatement pstmt_ins = connection.prepareStatement(insertQuery)) {
+                    pstmt_ins.setString(1, sd_modelname);
+                    pstmt_ins.setString(2, sd_modelhash);
 
-                ResultSet  rs = pstmt_sel.executeQuery();
-                if (rs.next()) {
-                    // Found
-                    id = rs.getInt("id");
-                } else {
-                    // Not Found (new Model)
-                    try (PreparedStatement pstmt_ins = connection.prepareStatement(insertQuery)) {
-                        pstmt_ins.setString(1, sd_modelname);
-                        pstmt_ins.setString(2, sd_modelhash);
+                    pstmt_ins.executeUpdate();
 
-                        pstmt_ins.executeUpdate();
-
-                        ResultSet  rs_ins = pstmt_ins.getGeneratedKeys();
-                        while (rs_ins.next()) {
-                            id = rs_ins.getInt(1);
-                        }
-                    }
-                    catch(SQLException ex) {
-                       ex.printStackTrace(System.err);
+                    ResultSet  rs_ins = pstmt_ins.getGeneratedKeys();
+                    while (rs_ins.next()) {
+                        id = rs_ins.getInt(1);
                     }
                 }
             }
-            catch(SQLException ex) {
-                ex.printStackTrace(System.err);
-            }
-
-        } catch(SQLException ex) {
-            ex.printStackTrace(System.err);
         }
 
         return  id;
     }
 
-    private void insertImage(int prompt, String filename) {
+    private void insertImage(Connection connection, int prompt, String filename) throws SQLException {
         String insertQuery = "INSERT INTO image (prompt, filename) VALUES (?,?);";
 
-        try (Connection connection = DriverManager.getConnection(getDBName())) 
-        {
-            try (PreparedStatement pstmt = connection.prepareStatement(insertQuery)) {
-                pstmt.setInt(1,prompt);
-                pstmt.setString(2,filename);
+        try (PreparedStatement pstmt = connection.prepareStatement(insertQuery)) {
+            pstmt.setInt(1,prompt);
+            pstmt.setString(2,filename);
 
-                pstmt.executeUpdate();
-            }
-            catch(SQLException ex) {
-                ex.printStackTrace(System.err);
-            }
-        }
-        catch(SQLException ex) {
-            ex.printStackTrace(System.err);
+            pstmt.executeUpdate();
         }
     }
     
@@ -182,31 +155,34 @@ public class SDLogDBConvert {
 		return null;
 	}
 
-    private void addLog(SDLog param) {
+    private void addLog(Connection connection, SDLog param) throws SQLException {
         int prompt, sdmodel;
-        sdmodel = insertSDModel(param.getSDModelName(), param.getSDModelHash());
-        prompt  = insertPrompt(param, sdmodel);
-        insertImage(prompt, param.getFilename());   //TODO
+        sdmodel = insertSDModel(connection, param.getSDModelName(), param.getSDModelHash());
+        prompt  = insertPrompt(connection, param, sdmodel);
+        insertImage(connection, prompt, param.getFilename());   //TODO
     }
 
 	public void readLog(Reader rd) {
-		CSVReader  csv = new CSVReader(rd);
 		int     num=0;	
 
-		try {
-			csv.readRow();//load hdr;
-
-			for (num=0; csv.isAvailable(); num++) {
-				SDLog  param = parseLine(csv);
-				if (param!=null) {
-					addLog(param);
-				}
-			}
-		} catch(IOException ex) {
-			ex.printStackTrace();
-		} catch(Exception ex) {
-			ex.printStackTrace();
-		}
+        try (Connection connection = DriverManager.getConnection(getDBName())) {
+            connection.setAutoCommit(false);
+		    try (CSVReader  csv = new CSVReader(rd)) {
+			    csv.readRow();//load hdr;
+                
+                for (num=0; csv.isAvailable(); num++) {
+                    SDLog  param = parseLine(csv);
+                    if (param!=null) {
+                        addLog(connection, param);
+                    }
+                }
+		    } catch(IOException ex) {
+			    ex.printStackTrace();
+            }
+            connection.commit();
+		} catch (SQLException ex) {
+            ex.printStackTrace(System.err);
+        }
 		System.out.println("read " + num + " lines");
 	}
 
