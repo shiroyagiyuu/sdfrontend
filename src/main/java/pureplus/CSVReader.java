@@ -145,8 +145,7 @@ public class CSVReader implements AutoCloseable
 	{
 		int n=0;
 		int maxtk=0;
-		try {
-			CSVReader  rd = new CSVReader(new FileReader(new File(args[0])));
+		try (CSVReader  rd = new CSVReader(new FileReader(new File(args[0])))) {
 
 			String[] tk = rd.readRow();
 			for(n=0; rd.isAvailable(); n++) {
