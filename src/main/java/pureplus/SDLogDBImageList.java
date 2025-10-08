@@ -65,6 +65,18 @@ public class SDLogDBImageList {
         return;
     }
 
+    private boolean isImageFile(String fname) {
+        String lname = fname.toLowerCase();
+        String exts[] = { ".png", ".jpg", ".jpeg" };
+
+        for (int i=0; i<exts.length; i++) {
+            if (lname.endsWith(exts[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void scanFileList(File image_dir) {
         if (image_dir.isDirectory()) {
             String[]  flist = image_dir.list();
@@ -75,17 +87,20 @@ public class SDLogDBImageList {
             try (Connection connection = DriverManager.getConnection(getDBName())) {
                 connection.setAutoCommit(false);
                 for (int i=0; i<flist.length; i++) {
-                    int  tmp_id;
                     String  fname = flist[i];
 
-                    tmp_id = getPromptIDFromFilename(connection, fname);
-                    if (tmp_id >= 0) { prompt_id = tmp_id; }
-                    if (prompt_id < 0) {
-                        System.err.println("Unknown prompt..?:"+fname);
-                        continue;
-                    }
+                    if (isImageFile(fname)) {
+                        int  tmp_id;
+                        
+                        tmp_id = getPromptIDFromFilename(connection, fname);
+                        if (tmp_id >= 0) { prompt_id = tmp_id; }
+                        if (prompt_id < 0) {
+                            System.err.println("Unknown prompt..?:"+fname);
+                            continue;
+                        }
 
-                    insertImageFile(connection, prompt_id, fname);
+                        insertImageFile(connection, prompt_id, fname);
+                    }
                 }
                 connection.commit();
             } catch (SQLException ex) {
