@@ -11,8 +11,67 @@ import javax.imageio.ImageIO;
 
 public class ImageThumbnail
 {
-    final static int THUMBNAIL_WIDTH = 300;
+    final static int THUMBNAIL_WIDTH = 150;
     final static int THUMBNAIL_HEIGHT = 200;
+
+	/**
+     * BOXフィルタで画像を縮小
+     * @param src 元画像
+     * @param newWidth 縮小後の幅
+     * @param newHeight 縮小後の高さ
+     * @return 縮小後の画像
+     */
+    public static BufferedImage resizeBoxFilter(BufferedImage src, int newWidth, int newHeight) {
+        if (src == null || newWidth <= 0 || newHeight <= 0) {
+            throw new IllegalArgumentException("Invalid image or dimensions.");
+        }
+
+        BufferedImage dst = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+
+        double xRatio = (double) src.getWidth() / newWidth;
+        double yRatio = (double) src.getHeight() / newHeight;
+
+        for (int y = 0; y < newHeight; y++) {
+            for (int x = 0; x < newWidth; x++) {
+
+                // 元画像での対応領域
+                int xStart = (int) Math.floor(x * xRatio);
+                int yStart = (int) Math.floor(y * yRatio);
+                int xEnd = (int) Math.min(Math.ceil((x + 1) * xRatio), src.getWidth());
+                int yEnd = (int) Math.min(Math.ceil((y + 1) * yRatio), src.getHeight());
+
+                long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
+                int count = 0;
+
+                for (int yy = yStart; yy < yEnd; yy++) {
+                    for (int xx = xStart; xx < xEnd; xx++) {
+                        int rgb = src.getRGB(xx, yy);
+                        int a = (rgb >> 24) & 0xFF;
+                        int r = (rgb >> 16) & 0xFF;
+                        int g = (rgb >> 8) & 0xFF;
+                        int b = rgb & 0xFF;
+
+                        sumA += a;
+                        sumR += r;
+                        sumG += g;
+                        sumB += b;
+                        count++;
+                    }
+                }
+
+                // 平均色を計算
+                int avgA = (int) (sumA / count);
+                int avgR = (int) (sumR / count);
+                int avgG = (int) (sumG / count);
+                int avgB = (int) (sumB / count);
+
+                int avgRGB = (avgA << 24) | (avgR << 16) | (avgG << 8) | avgB;
+                dst.setRGB(x, y, avgRGB);
+            }
+        }
+
+        return dst;
+	}
 
 	public static BufferedImage createThumbnail(BufferedImage  img) {
 		Dimension       base = new Dimension(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT);
@@ -36,14 +95,15 @@ public class ImageThumbnail
 
 		System.out.println("dstimg= "  +imgw+","+imgh);
 
-		dstimg = new BufferedImage(imgw, imgh, BufferedImage.TYPE_INT_RGB);
+		//dstimg = new BufferedImage(imgw, imgh, BufferedImage.TYPE_INT_RGB);
 
-		Graphics2D g = dstimg.createGraphics();
-		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		//Graphics2D g = dstimg.createGraphics();
+		//g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		//g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-		g.drawImage(img, 0, 0, imgw, imgh, null);
-		g.dispose();
+		//g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+		//g.drawImage(img, 0, 0, imgw, imgh, null);
+		//g.dispose();
+		dstimg = resizeBoxFilter(img, imgw, imgh);
 
 		return  dstimg;
 	}
