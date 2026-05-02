@@ -1,7 +1,5 @@
 package pureplus;
 
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
@@ -94,15 +92,6 @@ public class ImageThumbnail
 		int     imgh = (int)(img.getHeight() * scale_h);
 
 		System.out.println("dstimg= "  +imgw+","+imgh);
-
-		//dstimg = new BufferedImage(imgw, imgh, BufferedImage.TYPE_INT_RGB);
-
-		//Graphics2D g = dstimg.createGraphics();
-		//g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		//g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		//g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-		//g.drawImage(img, 0, 0, imgw, imgh, null);
-		//g.dispose();
 		dstimg = resizeBoxFilter(img, imgw, imgh);
 
 		return  dstimg;
