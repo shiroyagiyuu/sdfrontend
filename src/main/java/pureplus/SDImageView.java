@@ -1,15 +1,19 @@
 package pureplus;
 
-import java.awt.*;
-import java.awt.image.*;
-import javax.swing.*;
-import java.io.*;
-import javax.imageio.*;
+import java.awt.Rectangle;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Color;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import javax.swing.JComponent;
 
 class SDImageView extends JComponent
 {
-	Image   image;
-	File	file;
+	BufferedImage   image;
+	BufferedImage   cachedImage;
+	Rectangle       cachedBounds;
 
 	/**
      * BOXフィルタで画像を縮小
@@ -70,45 +74,53 @@ class SDImageView extends JComponent
         return dst;
 	}
 
-	public void paint(Graphics g) {
-		Graphics2D  g2d;
+	private BufferedImage createScaledImage(BufferedImage img, int dstw, int dsth) {
+		BufferedImage resized;
+		int  img_w = img.getWidth();
+		int  img_h = img.getHeight();
 
-		g2d = (Graphics2D)g;
+		double sc_w = (double)dstw / img_w;
+		double sc_h = (double)dsth / img_h;
 
+		double scale = (sc_w < sc_h)?sc_w:sc_h;
+
+		int   draw_w = (int)(img_w * scale);
+		int   draw_h = (int)(img_h * scale);
+
+		if (scale < 1.0) {
+			resized = resizeBoxFilter(img, draw_w, draw_h);
+		} else {
+			resized = new BufferedImage(draw_w, draw_h, BufferedImage.TYPE_INT_RGB);
+			Graphics2D  g2d = resized.createGraphics();
+			g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			g2d.drawImage(img, 0, 0, draw_w, draw_h, this);
+			g2d.dispose();
+		}
+		return resized;
+	}
+
+	public void paint(Graphics g) {		
 		Rectangle  bounds = this.getBounds();
 
-		g2d.setColor(Color.lightGray);
-		g2d.fillRect(0, 0, bounds.width, bounds.height);
+		g.setColor(Color.lightGray);
+		g.fillRect(0, 0, bounds.width, bounds.height);
 
 		if (image!=null) {
-
-			int  img_w = image.getWidth(this);
-			int  img_h = image.getHeight(this);
-
-			if (img_w != 0 && img_h != 0) {
-				double sc_w = (double)bounds.width / img_w;
-				double sc_h = (double)bounds.height / img_h;
-
-				double scale = (sc_w < sc_h)?sc_w:sc_h;
-
-				int   draw_w = (int)(img_w * scale);
-				int   draw_h = (int)(img_h * scale);
-				int   draw_x = (bounds.width - draw_w)/2;
-				int   draw_y = (bounds.height - draw_h)/2;
-	
-				if (scale < 1.0) {
-					BufferedImage  resized = resizeBoxFilter((BufferedImage)image, draw_w, draw_h);
-					//Image resized = image.getScaledInstance(draw_w, draw_h, Image.SCALE_AREA_AVERAGING);
-					g2d.drawImage(resized, draw_x, draw_y, draw_w, draw_h, this);
-				} else {
-					g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-										RenderingHints.VALUE_RENDER_QUALITY);
-					// BICUBIC 補間を指定
-        			g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                            			RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-					g2d.drawImage(image, draw_x, draw_y, draw_w, draw_h, this);
+			if (cachedImage != null && cachedBounds != null) {
+				if (bounds.width != cachedBounds.width || bounds.height != cachedBounds.height) {
+					cachedImage = createScaledImage(image, bounds.width, bounds.height);
+					cachedBounds = bounds;
 				}
+			} else {
+				cachedImage = createScaledImage(image, bounds.width, bounds.height);
+				cachedBounds = bounds;
 			}
+
+			int  draw_x = (bounds.width - cachedImage.getWidth()) / 2;
+			int  draw_y = (bounds.height - cachedImage.getHeight()) / 2;
+
+			g.drawImage(cachedImage, draw_x, draw_y, this);
 		}
 	}
 
@@ -116,8 +128,10 @@ class SDImageView extends JComponent
 		paint(g);
 	}
 
-	public void setImage(Image img) {
+	public void setImage(BufferedImage img) {
 		this.image = img;
+		this.cachedImage = null;
+		this.cachedBounds = null;
 		repaint();
 	}
 
@@ -131,24 +145,22 @@ class SDImageView extends JComponent
 		return new Dimension(128,128);
 	}
 
-	public void setImage(File file) {
+	public void setImage(java.io.File file) {
 		try {
 			if (file.exists()) {
-				Image  img = ImageIO.read(file);
-				this.file = file;
-
+				BufferedImage  img = javax.imageio.ImageIO.read(file);
 				setImage(img);
 			} else {
 				System.out.println("File not found: "+file.getName());
 			}
-		} catch (IOException ex) {
+		} catch (java.io.IOException ex) {
 			ex.printStackTrace();
 		}
 
 	}
 
 	public void setImage(String path) {
-		setImage(new File(path));
+		setImage(new java.io.File(path));
 	}
 }
 
