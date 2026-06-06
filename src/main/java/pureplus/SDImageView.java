@@ -29,8 +29,12 @@ class SDImageView extends JComponent
 
         BufferedImage dst = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
 
-        double xRatio = (double) src.getWidth() / newWidth;
-        double yRatio = (double) src.getHeight() / newHeight;
+		int srcw = src.getWidth();
+		int srch = src.getHeight();
+		int[] srcPixels = src.getRGB(0, 0, srcw, srch, null, 0, srcw);
+
+        double xRatio = (double) srcw / newWidth;
+        double yRatio = (double) srch / newHeight;
 
         for (int y = 0; y < newHeight; y++) {
             for (int x = 0; x < newWidth; x++) {
@@ -38,15 +42,16 @@ class SDImageView extends JComponent
                 // 元画像での対応領域
                 int xStart = (int) Math.floor(x * xRatio);
                 int yStart = (int) Math.floor(y * yRatio);
-                int xEnd = (int) Math.min(Math.ceil((x + 1) * xRatio), src.getWidth());
-                int yEnd = (int) Math.min(Math.ceil((y + 1) * yRatio), src.getHeight());
+                int xEnd = (int) Math.min(Math.ceil((x + 1) * xRatio), srcw);
+                int yEnd = (int) Math.min(Math.ceil((y + 1) * yRatio), srch);
 
                 long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
                 int count = 0;
 
                 for (int yy = yStart; yy < yEnd; yy++) {
+					int rowStart = yy * srcw;
                     for (int xx = xStart; xx < xEnd; xx++) {
-                        int rgb = src.getRGB(xx, yy);
+                        int rgb = srcPixels[rowStart + xx];
                         int a = (rgb >> 24) & 0xFF;
                         int r = (rgb >> 16) & 0xFF;
                         int g = (rgb >> 8) & 0xFF;
