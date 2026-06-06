@@ -84,13 +84,13 @@ public class ImageScaler {
 		scale_h = (double)height / (double)img.getHeight();
 		scale = Math.min(scale_w, scale_h);
 
-		System.out.println("img= "  +img.getWidth()+","+img.getHeight());
-		System.out.println("scale= "+scale_w+","+scale_h);
+		//System.out.println("img= "  +img.getWidth()+","+img.getHeight());
+		//System.out.println("scale= "+scale_w+","+scale_h);
 
 		int		imgw = (int)(img.getWidth()  * scale);
 		int     imgh = (int)(img.getHeight() * scale);
 
-		System.out.println("dstimg= "  +imgw+","+imgh);
+		//System.out.println("dstimg= "  +imgw+","+imgh);
 
         if (scale < 1.0) {
             dstimg = resizeBoxFilter(img, imgw, imgh);
