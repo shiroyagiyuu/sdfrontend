@@ -8,26 +8,19 @@ public class CSVReader implements AutoCloseable
 {
 	Reader  rd;
 	char	buffer[];
-	char	putc;
-	int	pt,remain;
-	boolean putted, line_end;
+	int		pt,remain;
+	boolean line_end;
 
 	public CSVReader(Reader rd) {
 		this.rd = rd;
 		buffer = new char[4096];
 		pt = 0;
 		remain = -1;
-		putted = false;
 		line_end = false;
 	}
 
 	public CSVReader(InputStream is) {
 		this(new InputStreamReader(is));
-	}
-
-	public void putChar(char c) {
-		putc = c;
-		putted = true;
 	}
 
 	private String loadString()
@@ -47,11 +40,6 @@ public class CSVReader implements AutoCloseable
 	}
 
 	public char getChar() {
-		if (putted) {
-			putted = false;
-			return putc;
-		}
-	
 		if (pt<remain) {
 			return buffer[pt++];
 		} else {
@@ -77,7 +65,7 @@ public class CSVReader implements AutoCloseable
 		return (!line_end) && (remain>0);
 	}
 	
-	public String next() {
+	private String next() {
 		char  c;
 		StringBuilder  sb = new StringBuilder();
 
@@ -108,7 +96,7 @@ public class CSVReader implements AutoCloseable
 		return sb.toString();
 	}
 
-	public void nextLine() {
+	private void nextLine() {
 		if (line_end == true) {
 			if (remain>0) {
 				line_end = false;

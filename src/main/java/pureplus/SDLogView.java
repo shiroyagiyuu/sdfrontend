@@ -1,6 +1,6 @@
 package pureplus;
 
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.MouseAdapter;
@@ -22,7 +22,7 @@ public class SDLogView
 	
 	File				basedir;
 	File				logfile;
-	int  curr_row;
+	int					curr_row;
 
 	public String[] parseCSV(String l) {
 		ArrayList<String>  ary = new ArrayList<String>();
@@ -183,7 +183,7 @@ public class SDLogView
 		pane.add(ctrl.createPane(), BorderLayout.CENTER);
 
 		imageview = new SDImageView();
-		imageview.setSize(new Dimension(512,512));
+		imageview.setSize(512,512);
 		//pane.add(imageview, BorderLayout.EAST);
 
 		imageview.addKeyListener(new KeyAdapter() {
