@@ -3,9 +3,11 @@ package pureplus;
 import java.awt.Rectangle;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
+import java.awt.RenderingHints;
 
 class SDImageView extends JComponent
 {
@@ -13,11 +15,21 @@ class SDImageView extends JComponent
 	BufferedImage   cachedImage;
 	Rectangle       cachedBounds;
 
-	public void paint(Graphics g) {		
+	public void paint(Graphics g) {
+		Graphics2D g2d = (Graphics2D)g;
+
+        // 高品質補間を指定
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                            RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
+                            RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                            RenderingHints.VALUE_ANTIALIAS_ON);
+
 		Rectangle  bounds = this.getBounds();
 
-		g.setColor(Color.lightGray);
-		g.fillRect(0, 0, bounds.width, bounds.height);
+		g2d.setColor(Color.lightGray);
+		g2d.fillRect(0, 0, bounds.width, bounds.height);
 
 		if (image!=null) {
 			if (cachedImage != null && cachedBounds != null) {
@@ -33,7 +45,7 @@ class SDImageView extends JComponent
 			int  draw_x = (bounds.width - cachedImage.getWidth()) / 2;
 			int  draw_y = (bounds.height - cachedImage.getHeight()) / 2;
 
-			g.drawImage(cachedImage, draw_x, draw_y, this);
+			g2d.drawImage(cachedImage, draw_x, draw_y, this);
 		}
 	}
 
